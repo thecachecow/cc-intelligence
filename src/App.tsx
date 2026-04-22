@@ -70,10 +70,9 @@ const Navbar = ({ user, onSignIn, onSignOut, currentView, onViewChange }: {
           </button>
         </div>
       ) : (
-        <button 
-          onClick={onSignIn}
+        <button
+          onClick={() => onViewChange('portal')}
           className="flex items-center gap-2 text-[11px] md:text-[12px] font-bold tracking-widest uppercase text-brand hover:opacity-70 transition-colors"
-          title="Sign in with Google to access Investor Materials"
         >
           <LogIn className="w-4 h-4" /> <span className="hidden sm:inline">Investor Sign In</span>
         </button>
@@ -82,7 +81,7 @@ const Navbar = ({ user, onSignIn, onSignOut, currentView, onViewChange }: {
   </nav>
 );
 
-const Hero = ({ onCinematicMode }: { onCinematicMode: () => void }) => (
+const Hero = ({ onCinematicMode, onRequestDeck }: { onCinematicMode: () => void, onRequestDeck: () => void }) => (
   <section className="relative min-h-screen flex flex-col justify-end px-6 md:px-16 py-24 overflow-hidden">
     {/* Background Video/Image */}
     <div className="absolute inset-0 z-0">
@@ -124,7 +123,7 @@ const Hero = ({ onCinematicMode }: { onCinematicMode: () => void }) => (
 
       <Reveal delay={0.25}>
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-24">
-          <button className="bg-accent text-brand px-10 py-5 rounded-full font-bold tracking-widest uppercase text-[11px] hover:bg-white transition-all duration-500 shadow-2xl shadow-accent/20 w-full sm:w-auto">
+          <button onClick={onRequestDeck} className="bg-accent text-brand px-10 py-5 rounded-full font-bold tracking-widest uppercase text-[11px] hover:bg-white transition-all duration-500 shadow-2xl shadow-accent/20 w-full sm:w-auto">
             Request Deck
           </button>
           <button 
@@ -266,7 +265,29 @@ function MainApp() {
         />
         
         <AnimatePresence mode="wait">
-          {user && isAuthReady && currentView === 'portal' ? (
+          {!user && isAuthReady && currentView === 'portal' ? (
+            <motion.div
+              key="signin"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="min-h-screen bg-paper flex items-center justify-center pt-16"
+            >
+              <div className="text-center max-w-md px-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent/10 border border-accent/20 text-[10px] font-bold text-accent uppercase tracking-widest mb-8">
+                  Investor Access
+                </div>
+                <h2 className="text-4xl font-serif font-bold text-ink mb-4">Sign in to continue</h2>
+                <p className="text-muted font-light mb-10">Access to CacheCow investor materials requires identity verification via Google.</p>
+                <button
+                  onClick={handleSignIn}
+                  className="inline-flex items-center gap-3 bg-brand text-white px-10 py-4 rounded-full font-bold tracking-widest uppercase text-[11px] hover:bg-accent hover:text-brand transition-all"
+                >
+                  <LogIn className="w-4 h-4" /> Sign in with Google
+                </button>
+              </div>
+            </motion.div>
+          ) : user && isAuthReady && currentView === 'portal' ? (
             <motion.div
               key="portal"
               initial={{ y: '100%', opacity: 0 }}
@@ -321,7 +342,7 @@ function MainApp() {
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.3 }}
             >
-              <Hero onCinematicMode={() => {}} />
+              <Hero onCinematicMode={() => {}} onRequestDeck={() => setCurrentView('portal')} />
 
             <Section id="problem">
               <SectionHeader 
@@ -508,8 +529,8 @@ function MainApp() {
                   </p>
                 </Reveal>
                 <Reveal delay={0.2}>
-                  <button 
-                    onClick={handleSignIn}
+                  <button
+                    onClick={() => setCurrentView('portal')}
                     className="bg-accent text-white px-12 py-6 rounded-full font-bold tracking-widest uppercase text-sm hover:bg-white hover:text-brand transition-all flex items-center gap-3 mx-auto"
                   >
                     Request Investment Deck <ArrowRight className="w-5 h-5" />
