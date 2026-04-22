@@ -265,7 +265,7 @@ function MainApp() {
         />
         
         <AnimatePresence mode="wait">
-          {!user && isAuthReady && currentView === 'portal' ? (
+          {currentView === 'portal' && !user ? (
             <motion.div
               key="signin"
               initial={{ opacity: 0 }}
@@ -287,7 +287,7 @@ function MainApp() {
                 </button>
               </div>
             </motion.div>
-          ) : user && isAuthReady && currentView === 'portal' ? (
+          ) : currentView === 'portal' && user ? (
             <motion.div
               key="portal"
               initial={{ y: '100%', opacity: 0 }}
