@@ -235,7 +235,13 @@ function MainApp() {
 
   const handleSignIn = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const { email, displayName, photoURL } = result.user;
+      fetch('/api/notify-signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, name: displayName, photoURL }),
+      }).catch(() => {});
       setCurrentView('portal');
     } catch (error) {
       console.error('Sign in error:', error);
