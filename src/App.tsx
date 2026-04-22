@@ -202,9 +202,6 @@ function MainApp() {
       setIsAuthReady(true);
       
       if (currentUser) {
-        if (location.pathname !== '/vault') {
-          setCurrentView('portal');
-        }
         try {
           const profileDoc = await getDoc(doc(db, 'ranchers', currentUser.uid));
           if (profileDoc.exists()) {
@@ -239,6 +236,7 @@ function MainApp() {
   const handleSignIn = async () => {
     try {
       await signInWithPopup(auth, googleProvider);
+      setCurrentView('portal');
     } catch (error) {
       console.error('Sign in error:', error);
     }
