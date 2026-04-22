@@ -1,0 +1,193 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: ranchers
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required, immutable)
+    //   - name: string (required, max 100)
+    //   - email: string (required, email format)
+    //   - ranchName: string (required, max 100)
+    //   - role: string (required, enum: ['admin', 'rancher'])
+    //
+    // Collection: animals
+    // Document ID: {animalId}
+    // Fields:
+    //   - id: string (required, immutable)
+    //   - rancherUid: string (required, immutable)
+    //   - name: string (optional, max 50)
+    //   - breed: string (optional, max 50)
+    //   - birthDate: string (optional, ISO date)
+    //   - healthScore: number (required, 0-100)
+    //   - status: string (required, enum: ['healthy', 'warning', 'critical'])
+    //   - lastUpdate: timestamp (required)
+    //
+    // Collection: healthEvents
+    // Document ID: {eventId}
+    // Fields:
+    //   - animalId: string (required, immutable)
+    //   - rancherUid: string (required, immutable)
+    //   - type: string (required, max 50)
+    //   - severity: string (required, enum: ['low', 'medium', 'high'])
+    //   - timestamp: timestamp (required)
+    //   - description: string (optional, max 500)
+    //
+    // Collection: revenue
+    // Document ID: {revenueId}
+    // Fields:
+    //   - rancherUid: string (required, immutable)
+    //   - amount: number (required, positive)
+    //   - rancherShare: number (required, positive)
+    //   - source: string (required, max 50)
+    //   - timestamp: timestamp (required)
+    //
+    // Collection: ndas
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required, immutable)
+    //   - email: string (required, email format)
+    //   - fullName: string (required, max 100)
+    //   - signedAt: timestamp (required)
+    //   - ipAddress: string (optional)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/ranchers/$(request.auth.uid)).data.role == 'admin' ||
+         ((request.auth.token.email == "kw@cachecow.io" || request.auth.token.email == "theusual@gmail.com") && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidStatus(status) {
+      return status in ['healthy', 'warning', 'critical'];
+    }
+
+    function isValidSeverity(severity) {
+      return severity in ['low', 'medium', 'high'];
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidRancher(data) {
+      return hasRequiredFields(['uid', 'name', 'email', 'ranchName', 'role']) &&
+             hasOnlyAllowedFields(['uid', 'name', 'email', 'ranchName', 'role']) &&
+             data.uid == request.auth.uid &&
+             data.name is string && data.name.size() <= 100 &&
+             isValidEmail(data.email) &&
+             data.ranchName is string && data.ranchName.size() <= 100 &&
+             data.role in ['admin', 'rancher'];
+    }
+
+    function isValidAnimal(data) {
+      return hasRequiredFields(['id', 'rancherUid', 'healthScore', 'status', 'lastUpdate']) &&
+             data.id is string && data.id.size() <= 50 &&
+             data.rancherUid is string &&
+             data.healthScore is number && data.healthScore >= 0 && data.healthScore <= 100 &&
+             isValidStatus(data.status) &&
+             data.lastUpdate is timestamp;
+    }
+
+    function isValidHealthEvent(data) {
+      return hasRequiredFields(['animalId', 'rancherUid', 'type', 'severity', 'timestamp']) &&
+             data.animalId is string &&
+             data.rancherUid is string &&
+             data.type is string && data.type.size() <= 50 &&
+             isValidSeverity(data.severity) &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidRevenue(data) {
+      return hasRequiredFields(['rancherUid', 'amount', 'rancherShare', 'source', 'timestamp']) &&
+             data.rancherUid is string &&
+             data.amount is number && data.amount >= 0 &&
+             data.rancherShare is number && data.rancherShare >= 0 &&
+             data.source is string && data.source.size() <= 50 &&
+             data.timestamp is timestamp;
+    }
+
+    function isValidNDA(data) {
+      return hasRequiredFields(['uid', 'email', 'fullName', 'signedAt']) &&
+             hasOnlyAllowedFields(['uid', 'email', 'fullName', 'signedAt', 'ipAddress']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             data.fullName is string && data.fullName.size() <= 100 &&
+             data.signedAt is timestamp;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /ranchers/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidRancher(request.resource.data) && (request.resource.data.role == 'rancher' || isAdmin());
+      allow update: if isOwner(userId) && isValidRancher(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+    }
+
+    match /animals/{animalId} {
+      allow read: if isAuthenticated() && (resource.data.rancherUid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isValidAnimal(request.resource.data) && (request.resource.data.rancherUid == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && isValidAnimal(request.resource.data) && 
+                    (resource.data.rancherUid == request.auth.uid || isAdmin()) &&
+                    request.resource.data.rancherUid == resource.data.rancherUid &&
+                    request.resource.data.id == resource.data.id;
+      allow delete: if isAdmin();
+    }
+
+    match /healthEvents/{eventId} {
+      allow read: if isAuthenticated() && (resource.data.rancherUid == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && isValidHealthEvent(request.resource.data) && (request.resource.data.rancherUid == request.auth.uid || isAdmin());
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /revenue/{revenueId} {
+      allow read: if isAuthenticated() && (resource.data.rancherUid == request.auth.uid || isAdmin());
+      allow create: if isAdmin(); // Only system/admin can create revenue records
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /ndas/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidNDA(request.resource.data);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,160 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@300;400;500&display=swap');
+
+@theme {
+  /* New Brand Colors */
+  --color-brand: #0D4A2F;
+  --color-accent: #2D9E75;
+  --color-ink: #141413;
+  --color-mid: #4A4A48;
+  --color-muted: #8E8E8A;
+  --color-rule: #E5E5E2;
+  --color-bg: #F5F5F4;
+  --color-paper: #FFFFFF;
+  
+  /* Additional Green/Grey shades */
+  --color-green-light: #E6F4EA;
+  --color-green-dark: #062E1C;
+  --color-grey-light: #F0F0EF;
+  --color-grey-dark: #2A2A28;
+
+  /* Legacy Color Mappings (to maintain structure) */
+  --color-linen: var(--color-bg);
+  --color-linen-mid: var(--color-grey-light);
+  --color-linen-deep: var(--color-rule);
+  --color-faint: var(--color-paper);
+  --color-ink-soft: var(--color-grey-dark);
+  --color-amber: var(--color-accent);
+  --color-amber-mid: var(--color-accent);
+  --color-amber-light: var(--color-green-light);
+  --color-amber-faint: var(--color-green-light);
+  --color-brown: var(--color-brand);
+  --color-warm: var(--color-mid);
+  --color-dust: var(--color-muted);
+  --color-rule-light: var(--color-grey-light);
+  --color-tobacco: var(--color-green-dark);
+  --color-mahogany: var(--color-brand);
+  --color-dark-mid: var(--color-grey-dark);
+  --color-rust: #8b4010;
+
+  /* Fonts */
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Spacing */
+  --spacing-13: 3.25rem;
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+
+  /* Shadows & Effects */
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.04);
+  --shadow-hard: 4px 4px 0px var(--color-rule);
+  
+  --radius-waabi: 10px;
+}
+
+/* ══════════════════════════════════
+   RESET & BASE
+   ══════════════════════════════════ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-bg text-ink font-sans selection:bg-accent selection:text-white overflow-x-hidden;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif tracking-tight;
+  }
+
+  img {
+    @apply block max-w-full h-auto;
+  }
+}
+
+/* ══════════════════════════════════
+   COMPONENTS & UTILITIES
+   ══════════════════════════════════ */
+@layer components {
+  .section-inner {
+    @apply max-w-[1200px] mx-auto w-full;
+  }
+
+  .eyebrow {
+    @apply block mb-4 text-[10px] font-medium tracking-[0.22em] uppercase text-accent;
+  }
+
+  .t-h2 {
+    @apply font-serif text-[clamp(28px,4vw,48px)] font-normal leading-[1.06] tracking-tight text-ink;
+  }
+
+  .t-h2 em {
+    @apply italic font-normal;
+  }
+
+  .t-body {
+    @apply text-[clamp(14px,1.1vw,15px)] leading-[1.7] text-muted font-light;
+  }
+
+  .t-body strong {
+    @apply font-medium text-ink;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center px-8 py-3.5 text-[10px] font-medium tracking-[0.18em] uppercase transition-all duration-300 cursor-pointer whitespace-nowrap border border-transparent text-center;
+  }
+
+  .btn-fill {
+    @apply bg-ink text-paper border-ink hover:bg-grey-dark hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-outline {
+    @apply bg-transparent text-muted border-rule hover:text-ink hover:border-brand hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-ghost-light {
+    @apply bg-transparent text-white/40 border-white/10 hover:text-white hover:border-white/30 hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .reveal {
+    @apply opacity-0 translate-y-4 transition-all duration-1000;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal.in {
+    @apply opacity-100 translate-y-0;
+  }
+
+  /* Technical Grid Utility */
+  .tech-grid {
+    background-image: radial-gradient(var(--color-rule) 0.5px, transparent 0.5px);
+    background-size: 24px 24px;
+  }
+
+  .hero-grid {
+    background-image: radial-gradient(circle, var(--color-rule) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .glass {
+    @apply bg-paper/80 backdrop-blur-xl border border-rule;
+  }
+
+  .mono-label {
+    @apply font-mono text-[9px] tracking-widest uppercase text-muted;
+  }
+
+  .micro-label {
+    @apply text-[10px] font-bold tracking-[0.2em] uppercase text-muted;
+  }
+
+  .editorial-card {
+    @apply bg-paper border border-rule p-8 rounded-waabi transition-all duration-500 hover:border-accent/30 hover:shadow-2xl hover:shadow-brand/5;
+  }
+}

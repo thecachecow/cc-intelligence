@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "Rancher": {
+      "title": "Rancher Profile",
+      "description": "The profile of the rancher managing the herd.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique ID of the rancher." },
+        "name": { "type": "string", "description": "The name of the rancher." },
+        "email": { "type": "string", "format": "email", "description": "The email address of the rancher." },
+        "ranchName": { "type": "string", "description": "The name of the ranch." },
+        "role": { "type": "string", "enum": ["admin", "rancher"], "description": "The role of the user." }
+      },
+      "required": ["uid", "name", "email", "ranchName", "role"]
+    },
+    "Animal": {
+      "title": "Animal Record",
+      "description": "A continuous biological record of an individual animal.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique ID of the animal (e.g., ear tag)." },
+        "rancherUid": { "type": "string", "description": "The UID of the rancher who owns the animal." },
+        "name": { "type": "string", "description": "The name or nickname of the animal." },
+        "breed": { "type": "string", "description": "The breed of the animal." },
+        "birthDate": { "type": "string", "format": "date", "description": "The birth date of the animal." },
+        "healthScore": { "type": "number", "description": "The current biological health score (0-100)." },
+        "status": { "type": "string", "enum": ["healthy", "warning", "critical"], "description": "The current health status." },
+        "lastUpdate": { "type": "string", "format": "date-time", "description": "The last time the data was updated." }
+      },
+      "required": ["id", "rancherUid", "healthScore", "status", "lastUpdate"]
+    },
+    "HealthEvent": {
+      "title": "Health Event",
+      "description": "A specific biological event or anomaly detected by the MII.",
+      "type": "object",
+      "properties": {
+        "animalId": { "type": "string", "description": "The ID of the animal involved." },
+        "rancherUid": { "type": "string", "description": "The UID of the rancher." },
+        "type": { "type": "string", "description": "The type of event (e.g., Respiratory, Estrus, Heat Stress)." },
+        "severity": { "type": "string", "enum": ["low", "medium", "high"], "description": "The severity of the event." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the event was detected." },
+        "description": { "type": "string", "description": "A detailed description of the anomaly." }
+      },
+      "required": ["animalId", "rancherUid", "type", "severity", "timestamp"]
+    },
+    "DataRevenue": {
+      "title": "Data Revenue Record",
+      "description": "A record of revenue generated from licensing animal data.",
+      "type": "object",
+      "properties": {
+        "rancherUid": { "type": "string", "description": "The UID of the rancher receiving the revenue." },
+        "amount": { "type": "number", "description": "The total amount generated." },
+        "rancherShare": { "type": "number", "description": "The rancher's 50% share." },
+        "source": { "type": "string", "description": "The source of the revenue (e.g., Pharma, Insurance)." },
+        "timestamp": { "type": "string", "format": "date-time", "description": "When the revenue was recorded." }
+      },
+      "required": ["rancherUid", "amount", "rancherShare", "source", "timestamp"]
+    },
+    "NDA": {
+      "title": "Non-Disclosure Agreement",
+      "description": "A record of a signed NDA for access to confidential investor materials.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The UID of the user who signed." },
+        "email": { "type": "string", "format": "email", "description": "The email of the signer." },
+        "fullName": { "type": "string", "description": "The full name of the signer." },
+        "signedAt": { "type": "string", "format": "date-time", "description": "When the NDA was signed." },
+        "ipAddress": { "type": "string", "description": "The IP address of the signer (optional)." }
+      },
+      "required": ["uid", "email", "fullName", "signedAt"]
+    }
+  },
+  "firestore": {
+    "/ranchers/{uid}": {
+      "schema": "Rancher",
+      "description": "Rancher profile documents."
+    },
+    "/animals/{animalId}": {
+      "schema": "Animal",
+      "description": "Individual animal biological records."
+    },
+    "/healthEvents/{eventId}": {
+      "schema": "HealthEvent",
+      "description": "Biological anomalies and health events."
+    },
+    "/revenue/{revenueId}": {
+      "schema": "DataRevenue",
+      "description": "Data licensing revenue records."
+    },
+    "/ndas/{uid}": {
+      "schema": "NDA",
+      "description": "Signed non-disclosure agreements."
+    }
+  }
+}
