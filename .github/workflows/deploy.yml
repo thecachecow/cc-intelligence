@@ -43,4 +43,4 @@ jobs:
           env_vars: |-
             NODE_ENV=production
             GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-            FIREBASE_CONFIG=${{ secrets.FIREBASE_CONFIG }}
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
