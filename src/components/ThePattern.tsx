@@ -9,7 +9,7 @@ const articles = [
     pub: "Bloomberg",
     title: "Halter Raises $220M in Series E — Founders Fund leads $2B valuation round",
     sub: "March 24, 2026 · The category is validated. The floor is set.",
-    url: "https://www.businesswire.com/news/home/20260324036414/en/Halter-Raises-%24220M-in-Series-E-to-Accelerate-Global-Expansion-of-Virtual-Fencing",
+    url: "https://bloomberg.com/news/articles/2026-03-20/peter-thiel-s-founders-fund-backs-ai-cow-collar-startup-at-2-billion-valuation",
     image: "/article-1.webp",
     logo: "/bloomberg.png"
   },
